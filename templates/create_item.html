@@ -1,0 +1,21 @@
+{% extends 'base_for_admin.html' %}
+
+{% block title %}
+    <title>BerelkaShop create</title>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1> додати вироб </h1>
+    <form action="{{url_for('create_item')}}" method="POST" enctype="multipart/form-data">
+        <input type="text" class="form-control" name="title" id="title" placeholder="назва"><br>
+        <input type="number" class="form-control" name="width" id="width" placeholder="ширина"><br>
+        <input type="number" class="form-control" name="height" id="height" placeholder="висота"><br>
+        <input type="text" class="form-control" name="materials" id="materials" placeholder="матеріали"><br>
+        <input type="text" class="form-control" name="about" id="about" placeholder="опис"><br>
+        <input type="number" class="form-control" name="price" id="price" placeholder="ціна"><br>
+        <input type="file" name="file1">
+        <button class="btn btn-success" type="submit">Add</button>
+    </form>
+</div>
+{% endblock %}
