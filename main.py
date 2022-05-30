@@ -1,12 +1,26 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, make_response, session
-from models import Item
-from _config import app, db
+
+from flask import Flask, render_template, request, redirect, url_for, make_response, session, send_from_directory
+from werkzeug.utils import secure_filename
+from pathlib import Path
+from models import Item, Image
+from _config import app, db, ALLOWED_EXTENSIONS
+
+
+def allowed_filename(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/')
 def index():
-    items = Item.query.order_by(Item.price).all()
+    items = Item.query.all() #.order_by(Item.id)
+    '''
+    data = []
+    for item in items:
+        data
+    image = make_response(item)
+    image.headers['Content-Type'] = 'image/png'
+    '''
     return render_template('index.html', data=items)
 
 
@@ -17,16 +31,12 @@ def about():
 @app.route('/admin', methods=["POST", "GET"])
 def login_admin():
     if 'userLogged' in session:
-        print(1)
         return redirect(url_for('create_item', username=session['userLogged']))
-    print(vars(session))
-    if request.method == "POST":
-        print(vars(session))
 
+    if request.method == "POST":
         if request.form['username'] == 'admin' and request.form['password'] == '123':
 
             session['userLogged'] = request.form['username']
-            print('---',vars(session))
             return redirect(url_for('create_item', username=session['userLogged']))
     return render_template('login_admin.html', title='вхід адміна')
 
@@ -35,32 +45,62 @@ def login_admin():
 def create_item():
     if request.method == "POST":
         title = request.form['title']
-        size = request.form['size']
+        width = request.form['width']
+        height = request.form['height']
+        materials = request.form['materials']
+        about = request.form['about']
         price = request.form['price']
-        im1 = request.files['file1'].read()
+        name_title = title.replace(' ', '_')
+        item = Item(title=title, width=width, height=height, materials=materials, about=about,
+                    price=price)
+        for i in range(1, 11):
 
-        '''im2 = request.files['file2'].read()
-        im3 = request.files['file3'].read()
-        im4 = request.files['file4'].read()
-        im5 = request.files['file5'].read()
-        im6 = request.files['file6'].read()
-        im7 = request.files['file7'].read()
-        im8 = request.files['file8'].read()
-        im9 = request.files['file9'].read()
-        im10 = request.files['file10'].read()'''
-
-        binary1 = sqlite3.Binary(im1)
-        item = Item(title=title, size=size, price=price, im1=binary1)
+            link_im = upload_file(i, request.files, name_title)
+            print('-'+str(link_im)+'-')
+            if link_im:
+                image = Image(link=link_im, item=item)
+                try:
+                    db.session.add(image)
+                    print('image added')
+                except:
+                    return f"Error. The image {link_im} doesn't add to database"
 
         try:
             db.session.add(item)
-            db.session.commit()
-            return redirect(url_for('create_item'))
+            print('yes')
+
+            #return redirect(url_for('create_item'))
         except:
             return "Error. The item doesn't add to database"
 
+        db.session.commit()
+        print('commited')
+        return redirect(url_for('create_item'))
     else:
         return render_template('create_item.html')
+
+
+def upload_file(index, files, name_title):
+    if 'file' + str(index) in files:
+        image = request.files['file' + str(index)]
+        if image and allowed_filename(image.filename):
+            filename = secure_filename(image.filename)
+            print(filename)
+            path_dir = Path(app.config['UPLOAD_FOLDER'], name_title)
+            if not path_dir.exists():
+                path_dir.mkdir()
+            path = Path(app.config['UPLOAD_FOLDER'], name_title, filename)
+            image.save(path)
+
+            send_from_directory(str(path_dir), filename)
+            #return redirect(url_for('download_file', name=str(path)))
+            return str(path) + ' '
+    return ''
+
+@app.route('/<name>')
+def download_file(name):
+    return send_from_directory(name)
+
 '''
 @app.route('/event/<int:id>/logo') 
 def event_logo(id): 
@@ -68,10 +108,11 @@ def event_logo(id):
     return app.response_class(event.im1, mimetype='application/octet-stream')
 '''
 
-@app.route('/im/<int:id>')
-def im(id):
+@app.route('/im/<int:id>/<i>')
+def im(id, i):
+    # <!-- "{{url_for('im', id=el.id)}}"-->
     item = Item.query.get(id)
-    b_image = item.im1
+    b_image = eval('item.im'+i)
     image = make_response(b_image)
     image.headers['Content-Type'] = 'image/png'
     return image
