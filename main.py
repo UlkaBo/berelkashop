@@ -1,6 +1,6 @@
 import sqlite3
 
-from flask import Flask, render_template, request, redirect, url_for, make_response, session, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, make_response, session, send_from_directory, send_file, abort
 from werkzeug.utils import secure_filename
 from pathlib import Path
 from models import Item, Image
@@ -13,14 +13,11 @@ def allowed_filename(filename):
 
 @app.route('/')
 def index():
+    print('----', dir(session))
+    print(session.modified)
+    #del session['list_cart']
     items = Item.query.all() #.order_by(Item.id)
-    '''
-    data = []
-    for item in items:
-        data
-    image = make_response(item)
-    image.headers['Content-Type'] = 'image/png'
-    '''
+    print('begin')
     return render_template('index.html', data=items)
 
 
@@ -69,7 +66,6 @@ def create_item():
             db.session.add(item)
             print('yes')
 
-            #return redirect(url_for('create_item'))
         except:
             return "Error. The item doesn't add to database"
 
@@ -94,12 +90,13 @@ def upload_file(index, files, name_title):
 
             send_from_directory(str(path_dir), filename)
             #return redirect(url_for('download_file', name=str(path)))
-            return str(path) + ' '
+            return str(path)
     return ''
-
+'''
 @app.route('/<name>')
 def download_file(name):
     return send_from_directory(name)
+'''
 
 '''
 @app.route('/event/<int:id>/logo') 
@@ -107,17 +104,27 @@ def event_logo(id):
     event = Item.query.get_or_404(id) 
     return app.response_class(event.im1, mimetype='application/octet-stream')
 '''
+@app.route('/item/<int:id>')
+def item(id):
+    data = Item.query.get(id)  # .order_by(Item.id)
+    return render_template('item.html', data=data)
 
-@app.route('/im/<int:id>/<i>')
-def im(id, i):
-    # <!-- "{{url_for('im', id=el.id)}}"-->
-    item = Item.query.get(id)
-    b_image = eval('item.im'+i)
-    image = make_response(b_image)
-    image.headers['Content-Type'] = 'image/png'
-    return image
+@app.route('/cart/<int:id>')
+def cart(id):
+    if 'list_cart' in session:
+        list_cart = session['list_cart']
+        list_cart.append(id)
+    else:
+        list_cart = []
+        list_cart.append(id)
+    session['list_cart'] = list_cart
+    print(session.items())
+    print(session.modified)
+    Item.query.filter_by(id)
+    return render_template('cart.html', data=list_cart)
 
 if __name__ == '__main__':
+
     app.run(debug=True)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

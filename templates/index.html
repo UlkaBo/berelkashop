@@ -1,98 +1,9 @@
 {% extends 'base.html' %}
-
 {% block title %}
     <title>BerelkaShop</title>
 {% endblock %}
 
 {% block body %}
--------------------------------------------------
-
-<div id="mainCarousel" class="carousel w-10/12 max-w-5xl mx-auto">
-  <div
-    class="carousel__slide"
-    data-src="https://lipsum.app/id/1/900x600"
-    data-fancybox="gallery"
-    data-caption="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum lobortis ultricies ipsum, a maximus ligula dignissim in. Sed consectetur tellus egestas, consequat dolor at, tempus augue. Morbi quis ipsum quis velit."
-  >
-    <img src="https://lipsum.app/id/1/600x400" />
-  </div>
-  <div
-    class="carousel__slide"
-    data-src="https://lipsum.app/id/2/900x600"
-    data-fancybox="gallery"
-    data-caption="Ut semper, justo eget vehicula vestibulum, enim enim suscipit lectus, et sagittis nibh risus vel metus. Quisque eu ornare ante, et gravida mauris"
-  >
-    <img src="https://lipsum.app/id/2/600x400" />
-  </div>
-  <div
-    class="carousel__slide"
-    data-src="https://lipsum.app/id/3/900x600"
-    data-fancybox="gallery"
-    data-caption="Hello 🖐"
-  >
-    <img src="https://lipsum.app/id/3/600x400" />
-  </div>
-  <div
-    class="carousel__slide"
-    data-src="https://lipsum.app/id/4/900x600"
-    data-fancybox="gallery"
-    data-caption="Another caption"
-  >
-    <img src="https://lipsum.app/id/4/600x400" />
-  </div>
-  <div
-    class="carousel__slide"
-    data-src="https://lipsum.app/id/5/900x600"
-    data-fancybox="gallery"
-  >
-    <img data-lazy-src="https://lipsum.app/id/5/600x400" />
-  </div>
-  <div
-    class="carousel__slide"
-    data-src="https://lipsum.app/id/6/900x600"
-    data-fancybox="gallery"
-  >
-    <img src="https://lipsum.app/id/6/600x400" />
-  </div>
-  <div
-    class="carousel__slide"
-    data-src="https://lipsum.app/id/7/900x600"
-    data-fancybox="gallery"
-  >
-    <img src="https://lipsum.app/id/7/600x400" />
-  </div>
-</div>
-
-<div id="thumbCarousel" class="carousel max-w-xl mx-auto">
-  <div class="carousel__slide">
-    <img class="panzoom__content" src="https://lipsum.app/id/1/100x100" />
-  </div>
-  <div class="carousel__slide">
-    <img class="panzoom__content" src="https://lipsum.app/id/2/100x100" />
-  </div>
-  <div class="carousel__slide">
-    <img class="panzoom__content" src="https://lipsum.app/id/3/100x100" />
-  </div>
-  <div class="carousel__slide">
-    <img class="panzoom__content" src="https://lipsum.app/id/4/100x100" />
-  </div>
-  <div class="carousel__slide">
-    <img class="panzoom__content" src="https://lipsum.app/id/5/100x100" />
-  </div>
-  <div class="carousel__slide">
-    <img class="panzoom__content" src="https://lipsum.app/id/6/100x100" />
-  </div>
-  <div class="carousel__slide">
-    <img class="panzoom__content" src="https://lipsum.app/id/7/100x100" />
-  </div>
-</div>
-
-
-
-
-----------------------------------------------------------------------------------------------
- <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
-
   <section class="py-5 text-center container">
     <div class="row py-lg-5">
       <div class="col-lg-6 col-md-8 mx-auto">
@@ -110,45 +21,45 @@
     <div class="container">
 
       <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+
         {% for el in data %}
 
         <div class="col">
+          <a class="item" href="{{ url_for('item', id=el.id ) }}" >
           <div class="card shadow-sm">
+            <div>
+              {%if el.images %}
+               <img src='{{el.images[0].link }}' data-fancybox={{el.id}} width="100%" >
+              {%endif%}
+            </div>
 
-            <div id="myCarousel" class="carousel slide" data-bs-ride="carousel">
-
-    <div class="carousel-inner">
-      <div class="carousel-item active">
-          {% for i in [1,2,3,4,5,6,7,8,9,10] %}
-            <img  data-fancybox={{el.id}} max-width="30%" height="40" src="{{url_for('im', id=el.id, i=i)}}">
-
-          {% endfor %}
-      </div>
-
-
-    </div>
-
-  </div>
-
+            <div id="thumbCarousel" class="carousel max-w-xl mx-auto">
+              <div class="carousel__slide">
+                {% for image in el.images %}
+                <img class="panzoom__content" src="{{ image.link }}" height="40" >
+                {% endfor %}
+              </div>
+            </div>
 
             <div class="card-body">
-              <p class="card-text">{{ el.title }} {{ el.width }} x {{ el.height }} cm </p>
+              <a  href="{{ url_for('item', id=el.id ) }}" class="item card-text">{{ el.title }} {{ el.width }} x {{ el.height }} cm </a>
               <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+                  <ul class="horizontal-flex filters-our-works list">
+                    <li><a href="{{ url_for('cart', id=el.id)}}" class="link our-works-button">Add to cart</a></li>
+                    <li><a href="" class="link our-works-button">Buy</a></li>
+                  </ul>
                 </div>
                 <small class="text-muted">{{ el.price }} грн.</small>
               </div>
             </div>
           </div>
+        </a>
         </div>
+
         {% endfor %}
 
       </div>
     </div>
   </div>
- <script src="/docs/5.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
- <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
- <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
 {% endblock %}
