@@ -120,7 +120,7 @@ def cart(id):
     session['list_cart'] = list_cart
     print(session.items())
     print(session.modified)
-    Item.query.filter_by(id)
+    #Item.query.filter_by(id)
     return render_template('cart.html', data=list_cart)
 
 if __name__ == '__main__':
