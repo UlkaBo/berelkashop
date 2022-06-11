@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, make_respo
 from werkzeug.utils import secure_filename
 from pathlib import Path
 from models import Item, Image
-from _config import app, db, ALLOWED_EXTENSIONS
+from _config import app, db, ALLOWED_EXTENSIONS, SECRET_KEY
 
 
 def allowed_filename(filename):
